@@ -1,4 +1,150 @@
+
 <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WASLA | وصلة من المصنع للتاجر</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6fa;color:#18324d}
+header{background:#123b68;color:white;padding:18px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.logo{font-size:27px;font-weight:bold;color:#ffad42}
+nav a{color:white;text-decoration:none;margin:8px;font-size:14px}
+button{cursor:pointer;border:0;border-radius:9px;padding:11px 17px;font-weight:bold}
+.hero{background:linear-gradient(120deg,#123b68,#2375aa);color:white;padding:65px 8%;min-height:290px}
+.hero h1{font-size:38px;line-height:1.5}
+.hero p{line-height:2;color:#e3edf7}
+.primary{background:#ff9e36;color:white}
+main{max-width:1100px;margin:auto;padding:25px 18px}
+h2{margin-top:35px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+input{padding:12px;border:1px solid #d5dfeb;border-radius:8px;font-size:15px}
+#search{flex:1;min-width:180px}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.card{background:white;border:1px solid #e0e7ef;border-radius:15px;padding:18px;box-shadow:0 3px 12px #123b680b}
+.icon{font-size:42px;background:#edf4fa;border-radius:12px;text-align:center;padding:18px}
+.card h3{font-size:17px}
+.price{font-weight:bold;color:#1769a5}
+.add{background:#123b68;color:white;width:100%;margin-top:10px}
+.panel{background:white;padding:20px;border-radius:14px;margin-top:28px}
+.item{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #eee}
+.status{color:#b66b12;font-weight:bold}
+footer{text-align:center;background:#123b68;color:white;padding:25px;margin-top:45px}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">وَصْلة WASLA</div>
+ <nav>
+  <a href="#products">المنتجات</a>
+  <a href="#cart">السلة</a>
+  <a href="#orders">طلباتي</a>
+ </nav>
+ <button class="primary" onclick="document.getElementById('cart').scrollIntoView()">السلة (<span id="count">0</span>)</button>
+</header>
+
+<section class="hero">
+ <h1>وصلة من المصنع للتاجر</h1>
+ <p>منصة توزيع غذائي تربط الشركات المصنعة بمحلات التجزئة.<br>اطلب منتجاتك بسهولة وتابع طلباتك من مكان واحد.</p>
+ <button class="primary" onclick="document.getElementById('products').scrollIntoView()">ابدأ التسوق</button>
+</section>
+
+<main>
+ <h2 id="products">كتالوج المنتجات</h2>
+ <div class="tools">
+  <input id="search" placeholder="ابحث عن منتج..." oninput="showProducts()">
+  <select id="category" onchange="showProducts()">
+   <option value="الكل">كل الأقسام</option>
+   <option value="ألبان">ألبان</option>
+   <option value="بقالة">بقالة</option>
+   <option value="مشروبات">مشروبات</option>
+  </select>
+ </div>
+ <div class="products" id="productList"></div>
+
+ <section class="panel" id="cart">
+  <h2>سلة المشتريات</h2>
+  <div id="cartList">السلة فارغة</div>
+  <h3>الإجمالي: <span id="total">0</span> جنيه</h3>
+  <input id="shop" placeholder="اسم المحل" style="width:100%;margin:6px 0">
+  <input id="phone" placeholder="رقم الموبايل" style="width:100%;margin:6px 0">
+  <button class="primary" onclick="checkout()">تأكيد الطلب التجريبي</button>
+ </section>
+
+ <section class="panel" id="orders">
+  <h2>طلباتي</h2>
+  <div id="orderList">لا توجد طلبات حتى الآن.</div>
+ </section>
+</main>
+
+<footer>
+ © 2026 WASLA — وصلة من المصنع للتاجر
+</footer>
+
+<script>
+const products=[
+{id:1,name:"لبن كامل الدسم 1 لتر",cat:"ألبان",price:32,icon:"🥛"},
+{id:2,name:"جبنة بيضاء 500 جم",cat:"ألبان",price:58,icon:"🧀"},
+{id:3,name:"زبادي",cat:"ألبان",price:9,icon:"🥣"},
+{id:4,name:"زيت طعام 1 لتر",cat:"بقالة",price:75,icon:"🫒"},
+{id:5,name:"سكر أبيض 1 كجم",cat:"بقالة",price:35,icon:"🧂"},
+{id:6,name:"مكرونة 400 جم",cat:"بقالة",price:18,icon:"🍝"},
+{id:7,name:"مياه معدنية",cat:"مشروبات",price:12,icon:"💧"},
+{id:8,name:"عصير مانجو",cat:"مشروبات",price:28,icon:"🧃"}
+];
+let cart={};
+function money(n){return n.toLocaleString("en-US")}
+function showProducts(){
+ let q=document.getElementById("search").value.toLowerCase();
+ let c=document.getElementById("category").value;
+ let list=products.filter(p=>p.name.toLowerCase().includes(q)&&(c==="الكل"||p.cat===c));
+ document.getElementById("productList").innerHTML=list.map(p=>`
+ <div class="card">
+ <div class="icon">${p.icon}</div>
+ <h3>${p.name}</h3>
+ <p>${p.cat}</p>
+ <p class="price">${money(p.price)} جنيه</p>
+ <button class="add" onclick="add(${p.id})">أضف إلى السلة</button>
+ </div>`).join("")||"لا توجد منتجات";
+}
+function add(id){cart[id]=(cart[id]||0)+1;showCart()}
+function showCart(){
+ let ids=Object.keys(cart);
+ let total=0;
+ document.getElementById("count").textContent=ids.reduce((s,id)=>s+cart[id],0);
+ document.getElementById("cartList").innerHTML=ids.length?ids.map(id=>{
+ let p=products.find(x=>x.id==id),sum=p.price*cart[id];total+=sum;
+ return `<div class="item"><span>${p.name} × ${cart[id]}</span><b>${money(sum)} جنيه</b><button onclick="removeItem(${id})">حذف</button></div>`;
+ }).join(""):"السلة فارغة";
+ document.getElementById("total").textContent=money(total);
+}
+function removeItem(id){delete cart[id];showCart()}
+function checkout(){
+ let ids=Object.keys(cart);
+ let shop=document.getElementById("shop").value.trim();
+ let phone=document.getElementById("phone").value.trim();
+ if(!ids.length)return alert("أضف منتجات للسلة أولا");
+ if(!shop||!phone)return alert("اكتب اسم المحل ورقم الموبايل");
+ let total=ids.reduce((s,id)=>s+products.find(p=>p.id==id).price*cart[id],0);
+ let orders=JSON.parse(localStorage.getItem("wasla_orders")||"[]");
+ orders.unshift({number:Date.now().toString().slice(-6),shop,phone,total,date:new Date().toLocaleDateString("ar-EG")});
+ localStorage.setItem("wasla_orders",JSON.stringify(orders));
+ cart={};showCart();showOrders();
+ document.getElementById("shop").value="";
+ document.getElementById("phone").value="";
+ alert("تم تسجيل الطلب التجريبي بنجاح");
+}
+function showOrders(){
+ let orders=JSON.parse(localStorage.getItem("wasla_orders")||"[]");
+ document.getElementById("orderList").innerHTML=orders.length?orders.map(o=>`
+ <div class="item"><div><b>طلب رقم #${o.number}</b><br>${o.shop} — ${o.date}<br><span class="status">قيد المراجعة - تجريبي</span></div><b>${money(o.total)} جنيه</b></div>`).join(""):"لا توجد طلبات حتى الآن.";
+}
+showProducts();showCart();showOrders();
+</script>
+</body>
+</html>
+
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
